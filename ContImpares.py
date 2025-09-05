@@ -5,4 +5,7 @@ def cont_impares(n):
             c += 1
     print(c)
 
-cont_impares(10)
+try:
+    cont_impares(2)
+except:
+    print('Error: No se aceptan letras o símbolos')
