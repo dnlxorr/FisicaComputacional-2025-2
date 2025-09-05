@@ -9,4 +9,4 @@ def cont_impares(n):
     except ValueError:
         return print('Error: no se ingresó un entero.')
 
-cont_impares(.)
+cont_impares('hola')
