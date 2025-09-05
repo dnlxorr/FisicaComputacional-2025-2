@@ -1,11 +1,12 @@
 def cont_impares(n):
-    c,i = 0,1
-    for i in range(n):
-        if i % 2 == 1:
-            c += 1
-    print(c)
+    try:
+        m = int(n)
+        c, i = 0, 1
+        for i in range(m):
+            if i % 2 == 1:
+                c += 1
+        return print(c)
+    except ValueError:
+        return print('Error: no se ingresó un entero.')
 
-try:
-    cont_impares(2)
-except:
-    print('Error: No se aceptan letras o símbolos')
+cont_impares(.)
