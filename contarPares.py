@@ -3,7 +3,6 @@ def cont_pares(nEntrada):
 
         numero = int(nEntrada)
 
-
         if numero <= 0:
             print("Error: ingrese un número entero positivo")
             return 0
