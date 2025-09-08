@@ -1,11 +1,28 @@
-def cont_pares(numero):
-    contador = 0
+numero = input("Ingrese un numero entero")
 
-    for numero in range(numero):
+def cont_pares(nEntrada):
+    try:
 
-        if numero %2 != 0:
-            contador = contador + 1
+        numero = int(nEntrada)
 
-            print(contador)
+        if numero <= 0:
+            print("Error: ingrese un número entero positivo")
+            return 0
 
-    cont_pares(100)
+        contador = 0
+        for i in range(1, numero + 1):
+            if i % 2 == 0:
+                contador += 1
+
+        print("Cantidad de números pares entre 1 y {numero}: {contador}")
+        return contador
+
+    except ValueError:
+        print("Error: la entrada no es un número entero válido, no se aceptan letras, simbolos ni decimales. Ingresa"
+              " un numero entero")
+        return 0
+
+cont_pares(numero)
+
+
+
