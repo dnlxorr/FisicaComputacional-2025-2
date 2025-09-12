@@ -1,12 +1,18 @@
+a = input('Ingrese un número cualquiera:')
+
 def cont_impares(n):
     try:
         m = int(n)
-        c, i = 0, 1
-        for i in range(m):
-            if i % 2 == 1:
-                c += 1
-        return print(c)
-    except ValueError:
-        return print('Error: no se ingresó un entero.')
+        if m >= 0:
+            c, i = 0, 1
+            for i in range(m + 1):
+                    if i % 2 == 1:
+                        c += 1
 
-cont_impares(.)
+            print(f'Hasta el número {n}, hay {c} números impares')
+        else:
+            print('Error: No se aceptan números negativos')
+    except:
+        return print('Error: No se aceptan letras, símbolos, decimales ni negativos')
+
+cont_impares(a)
