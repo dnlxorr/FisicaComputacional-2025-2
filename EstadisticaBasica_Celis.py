@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import random
 
 n = int(input('ingrese el tamaño de cada array: '))
@@ -65,3 +66,16 @@ promedio = prom_arrays(arrays)
 
 print(lista_mayores)
 print(promedio)
+
+indices = range(1, len(lista_mayores) + 1)
+
+plt.figure(figsize=(8,5))
+plt.plot(indices,lista_mayores,'o-r',label='Máximos')
+plt.plot(indices,promedio,'s-b', label='Promedios')
+
+plt.xlabel('Número de array')
+plt.ylabel('Valor')
+plt.title('Valores máximos y promedios de cada array')
+plt.legend()
+plt.grid(True)
+plt.show()
