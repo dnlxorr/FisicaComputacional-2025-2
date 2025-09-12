@@ -1,11 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+def ordenar_arrays (arrays):
+    for i in arrays:
+        i.sort()
 
 n = int(input('ingrese el tamaño de cada array: '))
 m = int(input('ingrese el número de arrays que desea: '))
 
-arrays = []
+arrays = np.array([])
 while True:
     print('Seleccione el valor que desea para los números dentro de los arrays')
     print('1. int (entero)')
@@ -22,9 +25,17 @@ while True:
         print('Ingrese donde termina el intervalo:')
         b= int(input())
 
-        for i in range(m):
+        arrays = np.zeros((m,n))
+        for i in range(m-1):
             x_i = np.random.randint(a,b, size=n)
-            arrays.append(x_i)
+            arrays[i] =  x_i
+        print(ordenar_arrays(arrays)    )
+        plt.imshow(arrays, cmap='hot', interpolation='nearest')
+        plt.colorbar(label='Temperature (°C)')
+        plt.title('Temperature Heatmap')
+        plt.xlabel('Longitude')
+        plt.ylabel('Latitude')
+        plt.show()
         break
 
     elif op == 2:
@@ -40,9 +51,7 @@ while True:
     else:
         print('Error: ingrese una opción válida')
 
-def ordenar_arrays (arrays):
-    for i in arrays:
-        i.sort()
+
 
 def prom_arrays (arrays):
     promedio = []
