@@ -14,7 +14,7 @@ def cont_pares(nEntrada):
             if i % 2 == 0:
                 contador += 1
 
-        print("Cantidad de números pares entre 1 y {numero}: {contador}")
+        print(f"Cantidad de números pares entre 1 y {numero}: {contador}")
         return contador
 
     except ValueError:
