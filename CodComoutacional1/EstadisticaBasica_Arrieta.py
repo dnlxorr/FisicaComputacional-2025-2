@@ -24,6 +24,8 @@ for i in range(m):
     arr.sort()  # ordenar ascendentemente
     arrays.append(arr)
 
+    
+
 # Cálculo de promedios
 medias = []
 for arr in arrays:
