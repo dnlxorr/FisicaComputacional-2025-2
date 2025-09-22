@@ -11,7 +11,7 @@ def derivada(f1delta, f2delta, deltax):
 deltax= 1e-1
 deltay=1e-1
 
-N = 100
+N = 10
 
 x_valores = []
 
