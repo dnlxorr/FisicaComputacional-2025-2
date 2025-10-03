@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import random
+import Particle
 
 def pos(x,y):
     return (x,y)
