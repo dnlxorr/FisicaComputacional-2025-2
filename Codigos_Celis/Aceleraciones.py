@@ -7,6 +7,34 @@ from Particle import IonTitanio
 def derivada(fMd, fmd, dx):
     return (fMd - fmd) / (2 * dx)
 
+# ----------------------
+# Interpolación bilineal
+# ----------------------
+def interp_bilineal(x, y, X, Y, Ex, Ey, dx, dy):
+    i = int(x / dx)
+    j = int(y / dy)
+
+    # Chequeo de límites
+    if i < 0 or j < 0 or i >= len(X[0]) - 1 or j >= len(Y) - 1:
+        return 0.0, 0.0
+
+    # Coordenadas de la celda
+    x0, x1 = X[0][i], X[0][i+1]
+    y0, y1 = Y[j][0], Y[j+1][0]
+
+    tx = (x - x0) / (x1 - x0)
+    ty = (y - y0) / (y1 - y0)
+
+    # Ex interpolado
+    Ex_interp = ((1-tx)*(1-ty)*Ex[j][i]     + tx*(1-ty)*Ex[j][i+1] +
+                 (1-tx)*ty*Ex[j+1][i]       + tx*ty*Ex[j+1][i+1])
+
+    # Ey interpolado
+    Ey_interp = ((1-tx)*(1-ty)*Ey[j][i]     + tx*(1-ty)*Ey[j][i+1] +
+                 (1-tx)*ty*Ey[j+1][i]       + tx*ty*Ey[j+1][i+1])
+
+    return Ex_interp, Ey_interp
+
 # -------------------
 # Constantes
 # -------------------
@@ -14,7 +42,7 @@ eps_0 = 8.8541e-12
 k = 1.0 / (4.0 * math.pi * eps_0)
 
 N = 1.0
-n_puntos = 50
+n_puntos = 100
 dx = N / n_puntos
 dy = N / n_puntos
 
@@ -81,7 +109,7 @@ for j in range(n_puntos):
             Ey[j][i] = math.copysign(max_field, Ey[j][i])
 
 # -------------------
-# Calcular fuerzas y aceleraciones sobre los iones
+# Calcular fuerzas y aceleraciones con interpolación
 # -------------------
 pos_iones = []
 Fuerzas = []
@@ -89,17 +117,10 @@ Aceleraciones = []
 
 for ion in iones:
     xi, yi = ion.getPosition()
-    i = int(xi / dx)
-    j = int(yi / dy)
-    if 0 <= i < n_puntos and 0 <= j < n_puntos:
-        Epx, Epy = Ex[j][i], Ey[j][i]
-        Fx, Fy = ion.charge * Epx, ion.charge * Epy
-        ax, ay = Fx / ion.mass, Fy / ion.mass
-        ion.setAcceleration([ax, ay])
-    else:
-        Fx, Fy = 0.0, 0.0
-        ax, ay = 0.0, 0.0
-        ion.setAcceleration([0.0, 0.0])
+    Epx, Epy = interp_bilineal(xi, yi, X, Y, Ex, Ey, dx, dy)
+    Fx, Fy = ion.charge * Epx, ion.charge * Epy
+    ax, ay = Fx / ion.mass, Fy / ion.mass
+    ion.setAcceleration([ax, ay])
 
     pos_iones.append((xi, yi))
     Fuerzas.append((Fx, Fy))
@@ -170,6 +191,7 @@ plt.show()
 # -------------------
 for idx, ion in enumerate(iones):
     print(f"Ion {idx+1}: Pos={ion.getPosition()}  Fuerza={Fuerzas[idx]}  Aceleración={ion.getAcceleration()}")
+
 
 
 
