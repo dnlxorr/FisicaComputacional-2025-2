@@ -2,188 +2,150 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import random
+import particle
 
-
-# derivada_central: diferencia central para aproximar derivadas parciales
-def derivada_central(f_plus, f_minus, dx):
-    """Devuelve la derivada central (f_plus - f_minus) / (2*dx)."""
-    return (f_plus - f_minus) / (2 * dx)
-
-# pos: función auxiliar (no usada pero documentada para claridad)
-def pos(x, y):
-    """Retorna una tupla (x,y)."""
+def obtener_posicion(x, y):
+    """
+    Devuelve una tupla con las coordenadas (x, y).
+    """
     return (x, y)
 
+def calcular_derivada(valor_mas, valor_menos, paso):
+    """
+    Calcula la derivada numérica usando el método de diferencia central.
+    """
+    return (valor_mas - valor_menos) / (2 * paso)
+
+# -------------------
+# Constantes físicas y de simulación
+# -------------------
+
+carga_elemental = 1.602e-19  # Carga elemental (C)
+num_cargas = 20
+perm_vacio = 8.8541e-12
+const_coulomb = 1.0 / (4.0 * math.pi * perm_vacio)
+
+tamano_dominio = 1.0
+
+num_puntos = 100
+delta_x = tamano_dominio / num_puntos
+delta_y = tamano_dominio / num_puntos
+
+coordenadas_x = [delta_x * i for i in range(num_puntos)]  # Coordenadas x
+coordenadas_y = [delta_y * i for i in range(num_puntos)]  # Coordenadas y
 
 
-q_elemental = 1.602e-19
-num_charges = 20
-eps_0 = 8.8541e-12
+# Generar cargas puntuales aleatorias
 
-k_coulomb = 1.0 / (4.0 * math.pi * eps_0)
-
-domain_size = 1.0              # tamaño del dominio (unidad arbitraria)
-n_points = 100                 # resolución de la malla (por eje)
-dx = domain_size / n_points
-dy = domain_size / n_points
-
-# Coordenadas 1D para la malla
-x_valores = [dx * i for i in range(n_points)]
-y_valores = [dy * i for i in range(n_points)]
+lista_cargas = []
+for _ in range(num_cargas):
+    pos_x = random.uniform(coordenadas_x[0], coordenadas_x[-1])  # Posición x aleatoria
+    pos_y = random.uniform(coordenadas_y[0], coordenadas_y[-1])  # Posición y aleatoria
+    signo = random.choice([-1, 1])  # Signo aleatorio (+ o -)
+    valor_carga = signo * carga_elemental
+    lista_cargas.append((pos_x, pos_y, valor_carga))
 
 
-# Generar cargas aleatorias
+# Crear mallas de coordenadas
 
-charges = []  # lista de tuplas (x, y, q)
-for _ in range(num_charges):
-    xq = random.uniform(x_valores[0], x_valores[-1])
-    yq = random.uniform(y_valores[0], y_valores[-1])
-    signo = random.choice([-1, 1])
-    qc = signo * q_elemental
-    charges.append((xq, yq, qc))
-
-
-# Construcción de mallas X,Y (listas anidadas, misma estructura que el código original)
-
-X = []
-Y = []
-for j in range(n_points):
-    filaX = []
-    filaY = []
-    for i in range(n_points):
-        filaX.append(x_valores[i])
-        filaY.append(y_valores[j])
-    X.append(filaX)
-    Y.append(filaY)
+malla_x = []
+malla_y = []
+for j in range(num_puntos):
+    fila_x = []
+    fila_y = []
+    for i in range(num_puntos):
+        fila_x.append(coordenadas_x[i])
+        fila_y.append(coordenadas_y[j])
+    malla_x.append(fila_x)
+    malla_y.append(fila_y)
 
 
-# Cálculo del potencial V(x,y)
+# Calcular el potencial eléctrico
 
-# pot_matrix tendrá la misma estructura: pot_matrix[j][i] corresponde a (x_valores[i], y_valores[j])
-pot_matrix = []
-r_cutoff = 1e-2   # umbral para evitar singularidad (se omite la contribución si r <= r_cutoff)
-for j in range(n_points):
-    fila = []
-    for i in range(n_points):
-        x = X[j][i]
-        y = Y[j][i]
-        V_ij = 0.0
-        for (xq, yq, qc) in charges:
-            dx_q = x - xq
-            dy_q = y - yq
-            r = math.sqrt(dx_q * dx_q + dy_q * dy_q)
-            if r > r_cutoff:
-                V_ij += (k_coulomb * qc) / r
-        fila.append(V_ij)
-    pot_matrix.append(fila)
-
-
-# Cálculo del campo eléctrico E = -grad(V) por diferencia central
-#
-Ex = [[0.0 for _ in range(n_points)] for _ in range(n_points)]
-Ey = [[0.0 for _ in range(n_points)] for _ in range(n_points)]
-
-for j in range(1, n_points - 1):
-    for i in range(1, n_points - 1):
-        Ex[j][i] = -derivada_central(pot_matrix[j][i + 1], pot_matrix[j][i - 1], dx)
-        Ey[j][i] = -derivada_central(pot_matrix[j + 1][i], pot_matrix[j - 1][i], dy)
+potencial = []
+dist_min = 1e-2  # Distancia mínima para evitar singularidades
+for j in range(num_puntos):
+    fila_potencial = []
+    for i in range(num_puntos):
+        x = malla_x[j][i]
+        y = malla_y[j][i]
+        potencial_ij = 0.0
+        for (x_ion, y_ion, carga_ion) in lista_cargas:
+            delta_x_ion = x - x_ion
+            delta_y_ion = y - y_ion
+            distancia = math.sqrt(delta_x_ion**2 + delta_y_ion**2)
+            if distancia > dist_min:
+                potencial_ij += (const_coulomb * carga_ion) / distancia
+        fila_potencial.append(potencial_ij)
+    potencial.append(fila_potencial)
 
 
-# Limitar magnitud del campo para visualización (evita flechas gigantes)
+# Calcular el campo eléctrico
 
-max_field = 1e-8
-for j in range(n_points):
-    for i in range(n_points):
-        if abs(Ex[j][i]) > max_field:
-            Ex[j][i] = math.copysign(max_field, Ex[j][i])
-        if abs(Ey[j][i]) > max_field:
-            Ey[j][i] = math.copysign(max_field, Ey[j][i])
+campo_x = [[0.0 for j in range(num_puntos)] for i in range(num_puntos)]
+campo_y = [[0.0 for j in range(num_puntos)] for i in range(num_puntos)]
 
-
-# Cálculo de fuerzas netas sobre cada carga (Coulomb par a par)
-
-forces = []  # lista de tuplas (Fx, Fy) para cada carga en 'charges'
-for idx_i, (xi, yi, qi) in enumerate(charges):
-    Fx, Fy = 0.0, 0.0
-    for idx_j, (xj, yj, qj) in enumerate(charges):
-        if idx_i != idx_j:
-            dx_q = xi - xj
-            dy_q = yi - yj
-            r2 = dx_q * dx_q + dy_q * dy_q
-            r = math.sqrt(r2)
-            if r > 1e-12:
-                F = k_coulomb * qi * qj / r2
-                Fx += F * (dx_q / r)
-                Fy += F * (dy_q / r)
-    forces.append((Fx, Fy))
+for j in range(1, num_puntos - 1):
+    for i in range(1, num_puntos - 1):
+        campo_x[j][i] = -calcular_derivada(potencial[j][i + 1], potencial[j][i - 1], delta_x)
+        campo_y[j][i] = -calcular_derivada(potencial[j + 1][i], potencial[j - 1][i], delta_y)
 
 
-# Preparar vectores aplanados para quiver según el esquema solicitado
-# coord_x, coord_y: listas 1D con coordenadas de cada punto de la malla (filas recorridas)
-# A, B: componentes del campo eléctrico (Ex,Ey) en el mismo orden
+# Limitar el campo eléctrico para evitar valores extremos
 
-coord_x = []
-coord_y = []
-A = []
-B = []
-for j in range(n_points):
-    for i in range(n_points):
-        coord_x.append(X[j][i])
-        coord_y.append(Y[j][i])
-        A.append(Ex[j][i])
-        B.append(Ey[j][i])
+limite_campo = 1e-8
+for j in range(num_puntos):
+    for i in range(num_puntos):
+        if abs(campo_x[j][i]) > limite_campo:
+            campo_x[j][i] = math.copysign(limite_campo, campo_x[j][i])
+        if abs(campo_y[j][i]) > limite_campo:
+            campo_y[j][i] = math.copysign(limite_campo, campo_y[j][i])
 
 
-# Preparar datos para graficar las cargas (ya están en 'charges')
-# y para graficar las fuerzas sobre cada carga (normalizadas para mostrar dirección)
+# Calcular la fuerza sobre cada carga
 
-x_charges = [c[0] for c in charges]
-y_charges = [c[1] for c in charges]
+fuerzas_iones = []
+for i, (x_i, y_i, carga_i) in enumerate(lista_cargas):
+    fuerza_x, fuerza_y = 0.0, 0.0
+    for j, (x_j, y_j, carga_j) in enumerate(lista_cargas):
+        if i != j:  # Evitar autointeracción
+            delta_x_ion = x_i - x_j
+            delta_y_ion = y_i - y_j
+            distancia_cuadrada = delta_x_ion**2 + delta_y_ion**2
+            distancia = math.sqrt(distancia_cuadrada)
+            if distancia > 1e-12:  # Evitar división por cero
+                fuerza = const_coulomb * carga_i * carga_j / distancia_cuadrada
+                fuerza_x += fuerza * delta_x_ion / distancia
+                fuerza_y += fuerza * delta_y_ion / distancia
+    fuerzas_iones.append((fuerza_x, fuerza_y))
 
-# Flechas de fuerza normalizadas y dimensionadas a longitud fija L (mantener esquema original)
-L = 0.02
-Fx_plot = []
-Fy_plot = []
-for fx, fy in forces:
-    norm = math.hypot(fx, fy)
-    if norm > 0:
-        Fx_plot.append(fx / norm * L)
-        Fy_plot.append(fy / norm * L)
+
+# Visualización: Potencial, campo eléctrico y fuerzas
+
+plt.figure(figsize=(8, 8))
+plt.contour(malla_x, malla_y, potencial, levels=15, alpha=0.6)
+plt.quiver(malla_x, malla_y, campo_x, campo_y, color='g', alpha=0.5)
+
+posiciones_x_cargas = [carga[0] for carga in lista_cargas]
+posiciones_y_cargas = [carga[1] for carga in lista_cargas]
+
+longitud_flecha = 0.02
+fuerzas_x_grafico = []
+fuerzas_y_grafico = []
+for fx, fy in fuerzas_iones:
+    norma = math.hypot(fx, fy)
+    if norma > 0:
+        fuerzas_x_grafico.append(fx / norma * longitud_flecha)
+        fuerzas_y_grafico.append(fy / norma * longitud_flecha)
     else:
-        Fx_plot.append(0.0)
-        Fy_plot.append(0.0)
+        fuerzas_x_grafico.append(0.0)
+        fuerzas_y_grafico.append(0.0)
 
-
-# GRAFICADO (usando la plantilla que solicitaste, pero manteniendo el esquema original)
-#  Contornos del potencial (pot_matrix)
-# Vector field (quiver) del campo eléctrico (A,B)
-# Dibujar cargas con color según signo
-# Dibujar flechas en las posiciones de las cargas que indican la dirección de la fuerza neta
-
-plt.figure(figsize=(10, 8))
-
-# contour acepta x 1D, y 1D y z como matriz con forma (len(y), len(x))
-z = pot_matrix  # alias solicitado
-plt.contour(x_valores, y_valores, z, levels=15, alpha=0.8)
-
-# quiver del campo eléctrico (flechas en escala visual)
-plt.quiver(coord_x, coord_y, A, B, color='green')
-
-# Dibujar cargas (rojo positivo, azul negativo)
-for (xc, yc, qc) in charges:
-    if qc > 0:
-        plt.plot(xc, yc, 'ro', markersize=6)
-    else:
-        plt.plot(xc, yc, 'bo', markersize=6)
-
-# Dibujar flechas de fuerza (sobre las cargas) en azul, manteniendo el estilo con pivot middle
-plt.quiver(x_charges, y_charges, Fx_plot, Fy_plot,
+plt.quiver(posiciones_x_cargas, posiciones_y_cargas, fuerzas_x_grafico, fuerzas_y_grafico,
            color='b', angles='xy', scale_units='xy', scale=1,
            width=0.008, headwidth=4, headlength=6, minlength=0,
            pivot='middle', zorder=5)
 
-plt.xlabel("x")
-plt.ylabel("y")
-plt.title("Campo eléctrico (flechas) y potencial (contornos)")
+plt.title('Potencial eléctrico, campo eléctrico y fuerzas sobre las cargas')
 plt.axis('equal')
 plt.show()
