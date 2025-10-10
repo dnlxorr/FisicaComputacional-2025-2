@@ -13,7 +13,10 @@ def seg_derivada(fMd,fmd,f,dx):
 
 dx=1e-1
 
-N=100
+N= 100
+
+l_malla = N*dx
+
 
 x_val = []
 
