@@ -1,160 +1,129 @@
 from abc import ABC, abstractmethod
-import numpy as np
+import math
 
-class Particle (ABC):
-    def __init__(self, mass=0.0, charge=0.0, position=np.array([0.0, 0.0]), velocity = np.array([0.0, 0.0]), acceleration = np.array([0.0, 0.0])):
-        self.mass=mass
-        self.charge=charge
-        self.position= position
-        self.velocity = velocity
-        self.acceleration = acceleration
+# ==================================================
+# Clase base abstracta
+# ==================================================
+class Particle(ABC):
+    def __init__(self, mass=1.0, charge=0.0):
+        self.mass = mass
+        self.charge = charge
+        self.pos = [0.0, 0.0]
+        self.vel = [0.0, 0.0]
+        self.acc = [0.0, 0.0]
+        self.trayectoria_x = []
+        self.trayectoria_y = []
 
-        @abstractmethod
-        def move(self):
-            pass
+    @abstractmethod
+    def move(self, dt):
+        pass
 
-        @abstractmethod
-        def setPosition(self):
-            pass
+    @abstractmethod
+    def applyBoundary(self, N):
+        pass
 
-        @abstractmethod
-        def getPosition(self):
-            pass
+    def setPosition(self, pos):
+        self.pos = [pos[0], pos[1]]
 
-        @abstractmethod
-        def getVelocity(self):
-            pass
+    def getPosition(self):
+        return [self.pos[0], self.pos[1]]
 
-        @abstractmethod
-        def getAcceleration(self):
-            pass
+    def setVelocity(self, vel):
+        self.vel = [vel[0], vel[1]]
+
+    def getVelocity(self):
+        return [self.vel[0], self.vel[1]]
+
+    def setAcceleration(self, acel):
+        self.acc = [acel[0], acel[1]]
+
+    def getAcceleration(self):
+        return [self.acc[0], self.acc[1]]
+
+# ==================================================
+# Clases concretas
+# ==================================================
+
+class IonTitanio(Particle):
+    def __init__(self, x=0.0, y=0.0, vx=0.0, vy=0.0):
+        super().__init__(mass=7.95e-26, charge=-1.602e-19)
+        self.pos = [x, y]
+        self.vel = [vx, vy]
+        self.acc = [0.0, 0.0]
+        self.trayectoria_x = [x]
+        self.trayectoria_y = [y]
+
+    def move(self, dt):
+        # Movimiento tipo Leapfrog (simplificado)
+        self.vel[0] += self.acc[0] * dt
+        self.vel[1] += self.acc[1] * dt
+        self.pos[0] += self.vel[0] * dt
+        self.pos[1] += self.vel[1] * dt
+
+        # Guardar trayectoria
+        self.trayectoria_x.append(self.pos[0])
+        self.trayectoria_y.append(self.pos[1])
+
+    def applyBoundary(self, N):
+        # Rebote en bordes (en lugar de desaparecer)
+        if self.pos[0] > N:
+            self.pos[0] = N
+            self.vel[0] *= -1
+        elif self.pos[0] < 0:
+            self.pos[0] = 0
+            self.vel[0] *= -1
+
+        if self.pos[1] > N:
+            self.pos[1] = N
+            self.vel[1] *= -1
+        elif self.pos[1] < 0:
+            self.pos[1] = 0
+            self.vel[1] *= -1
 
 
 class Electron(Particle):
+    def __init__(self, x=0.0, y=0.0, vx=0.0, vy=0.0):
+        super().__init__(mass=9.11e-31, charge=-1.602e-19)
+        self.pos = [x, y]
+        self.vel = [vx, vy]
+        self.acc = [0.0, 0.0]
+        self.trayectoria_x = [x]
+        self.trayectoria_y = [y]
 
-    def __init__(self):
-        super().__init__(mass=9.11e-31,charge=-1.60e-19)
+    def move(self, dt):
+        self.vel[0] += self.acc[0] * dt
+        self.vel[1] += self.acc[1] * dt
+        self.pos[0] += self.vel[0] * dt
+        self.pos[1] += self.vel[1] * dt
+        self.trayectoria_x.append(self.pos[0])
+        self.trayectoria_y.append(self.pos[1])
 
-    def setPosition(self,pos):
-        self.position = pos
-
-    def getPosition(self):
-        return self.position
-
-    def setVelocity(self,vel):
-        self.velocity = vel
-
-    def getVelocity(self):
-        return self.velocity
-
-    def setAcceleration(self,acel):
-         self.acceleration = acel
-
-    def getAcceleration(self):
-        return self.acceleration
-
-    def move(self):
-        self.position = self.position + np.array([1,1])
-
-    def emisionFoton(self,energia):
-        print(f"El electrón emite un fotón de {energia}")
-
-    def calDeBroglieLongitudOnda(self):
-        h = 6.62607015e-34
-        v=np.linalg.norm(self.velocity) #Calcular el modulo
-
-        if v==0:
-            return mp.inf
-        return h/(self.mass*v)
+    def applyBoundary(self, N):
+        if self.pos[0] > N or self.pos[0] < 0:
+            self.vel[0] *= -1
+        if self.pos[1] > N or self.pos[1] < 0:
+            self.vel[1] *= -1
 
 
 class Proton(Particle):
+    def __init__(self, x=0.0, y=0.0, vx=0.0, vy=0.0):
+        super().__init__(mass=1.6726e-27, charge=1.602e-19)
+        self.pos = [x, y]
+        self.vel = [vx, vy]
+        self.acc = [0.0, 0.0]
+        self.trayectoria_x = [x]
+        self.trayectoria_y = [y]
 
-    def __init__(self):
-        super().__init__(mass=1.6726e-27, charge=1.60e-19)
+    def move(self, dt):
+        self.vel[0] += self.acc[0] * dt
+        self.vel[1] += self.acc[1] * dt
+        self.pos[0] += self.vel[0] * dt
+        self.pos[1] += self.vel[1] * dt
+        self.trayectoria_x.append(self.pos[0])
+        self.trayectoria_y.append(self.pos[1])
 
-    def setPosition(self, pos):
-        self.position = pos
-
-    def getPosition(self):
-        return self.position
-
-    def setVelocity(self, vel):
-        self.velocity = vel
-
-    def getVelocity(self):
-        return self.velocity
-
-    def setAcceleration(self, acel):
-        self.acceleration = acel
-
-    def getAcceleration(self):
-        return self.acceleration
-
-    def move(self):
-        self.position = self.position + np.array([1, 1])
-
-    def calcularMomentoMagnetico(self):
-        magneton_nuclear = 5.050783699e-27
-        g_factor = 5.5856946893
-        return g_factor*magneton_nuclear
-
-class Neutron(Particle):
-
-    def __init__(self):
-        super().__init__(mass=1.6749e-27, charge=0)
-
-    def setPosition(self, pos):
-        self.position = pos
-
-    def getPosition(self):
-        return self.position
-
-    def setVelocity(self, vel):
-        self.velocity = vel
-
-    def getVelocity(self):
-        return self.velocity
-
-    def setAcceleration(self, acel):
-        self.acceleration = acel
-
-    def getAcceleration(self):
-        return self.acceleration
-
-    def move(self,dt):
-        self.velocity += self.acceleration * dt
-        self.position += self.velocity * dt
-
-    def calMomentoMagnetico(self):
-        magneton_nuclear = 5.050783699e-27
-        g_factor = -3.82608545
-        return g_factor*magneton_nuclear
-
-class IonTitanio(Particle):
-
-    def __init__(self):
-        super().__init__(mass=7.95e-26,charge=-1.602e-19)
-
-    def setPosition(self,pos):
-        pos = np.array(pos)
-        self.position = pos
-
-
-    def getPosition(self):
-        return self.position
-
-    def setVelocity(self,vel):
-        self.velocity = vel
-
-    def getVelocity(self):
-        return self.velocity
-
-    def setAcceleration(self,acel):
-         self.acceleration = acel
-
-    def getAcceleration(self):
-        return self.acceleration
-
-    def move(self):
-        self.position = self.position + np.array([1,1])
+    def applyBoundary(self, N):
+        if self.pos[0] > N or self.pos[0] < 0:
+            self.vel[0] *= -1
+        if self.pos[1] > N or self.pos[1] < 0:
+            self.vel[1] *= -1
