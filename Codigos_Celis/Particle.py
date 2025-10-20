@@ -54,31 +54,27 @@ class IonTitanio(Particle):
         self.trayectoria_y = [y]
 
     def move(self, dt):
-        # Movimiento tipo Leapfrog (simplificado)
+        # Integración simple tipo Leapfrog
         self.vel[0] += self.acc[0] * dt
         self.vel[1] += self.acc[1] * dt
         self.pos[0] += self.vel[0] * dt
         self.pos[1] += self.vel[1] * dt
 
-        # Guardar trayectoria
+        # Guardar la trayectoria
         self.trayectoria_x.append(self.pos[0])
         self.trayectoria_y.append(self.pos[1])
 
-    def applyBoundary(self, N):
-        # Rebote en bordes (en lugar de desaparecer)
-        if self.pos[0] > N:
-            self.pos[0] = N
-            self.vel[0] *= -1
-        elif self.pos[0] < 0:
-            self.pos[0] = 0
-            self.vel[0] *= -1
+    def applyBoundary(self, L):
+        # Condiciones periódicas
+        if self.pos[0] < 0:
+            self.pos[0] += L
+        elif self.pos[0] >= L:
+            self.pos[0] -= L
 
-        if self.pos[1] > N:
-            self.pos[1] = N
-            self.vel[1] *= -1
-        elif self.pos[1] < 0:
-            self.pos[1] = 0
-            self.vel[1] *= -1
+        if self.pos[1] < 0:
+            self.pos[1] += L
+        elif self.pos[1] >= L:
+            self.pos[1] -= L
 
 
 class Electron(Particle):
