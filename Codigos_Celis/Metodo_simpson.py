@@ -18,7 +18,7 @@ def met_simpson (a,b,N,f):
     return suma*(dx/3)
 
 def f (x):
-    return x**3
+    return math.log(math.log(x))
 
 i = met_simpson(0,20,1000,f)
 print(i)
