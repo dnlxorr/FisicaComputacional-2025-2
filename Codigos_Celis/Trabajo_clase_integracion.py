@@ -57,3 +57,4 @@ print("Valor teórico: ",valor_teorico)
 print(f"Error Trapecios: {abs(trap - valor_teorico):.6f}")
 print(f"Error Simpson: {abs(simp - valor_teorico):.6f}")
 print(f"Error Gauss: {abs(gauss - valor_teorico):.6f}")
+
