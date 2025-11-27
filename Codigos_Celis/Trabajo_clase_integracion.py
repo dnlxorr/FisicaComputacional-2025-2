@@ -41,13 +41,13 @@ def met_cuadraturas_Gauss(a, b, f):
 
 def F (x):
     k = 200 #N/m
-    return k*x
+    return -k*x
 
 trap = met_trapecios(0, 0.5, 1000, F)
 simp = met_simpson(0, 0.5, 1000, F)
 gauss = met_cuadraturas_Gauss(0, 0.5,F)
 
-valor_teorico = 25
+valor_teorico = -25
 
 print(f"\nFunción F(x)=kx:")
 print("Método de Trapecios: ",trap)
