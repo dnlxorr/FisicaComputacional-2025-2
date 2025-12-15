@@ -18,5 +18,10 @@ def integrar_Trapecio(a,b,N,f):
 def f (x):
     return x
 
-i = integrate(0,20,1000,f)
-print(i)
+a=0
+b=20
+N=1000
+
+resultadointegral = integrar_Trapecio(a,b,N,f)
+
+print(f"El resultado de la integral entre los intervalos {a} y {b} es aproximadamente: {resultadointegral: .0f} ")
