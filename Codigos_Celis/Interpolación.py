@@ -77,7 +77,7 @@ def procesar_interpolaciones(func, nombre, n_puntos):
     x_vals = np.array([i*dx for i in range(n_puntos)])
     y_vals = func(x_vals)
 
-    x0 = 2
+    x0 = 2.8734
     y_exacto = func(x0)
 
     # --- Lineal ---
